@@ -1,8 +1,8 @@
 #define CHECK_TARGET
 
-#import <PSHeader/PS.h>
-#import <QuartzCore/QuartzCore.h>
 #import <UIKit/UIKit.h>
+#import <QuartzCore/QuartzCore.h>
+#import <PSHeader/PS.h>
 
 #define domain CFSTR("com.apple.UIKit")
 #define whitelistKey CFSTR("CAHighFPS")

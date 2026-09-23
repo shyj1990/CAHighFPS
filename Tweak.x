@@ -9,6 +9,7 @@
 #define systemWideKey CFSTR("CAHighFPSSystemWide")
 #define blacklistKey CFSTR("CAHighFPSBlacklist")
 #define customFPSKey CFSTR("CAHighFPSCustomFPS")
+#define metalKey CFSTR("CAHighFPSEnableMetal")
 
 @interface CAMetalLayer (Private)
 @property (assign) CGFloat drawableTimeoutSeconds;
@@ -25,6 +26,7 @@ typedef struct {
 static NSInteger maxFPS = -1;
 static NSInteger customFPS = 0;
 static BOOL systemWide = NO;
+static BOOL metalEnabled = YES;
 static NSArray<NSString *> *whitelist;
 static NSArray<NSString *> *blacklist;
 
@@ -47,6 +49,10 @@ static void loadPreferences() {
 
     id customFPSValue = copyPrefValue(customFPSKey);
     customFPS = [customFPSValue isKindOfClass:[NSNumber class]] ? (NSInteger)lround([customFPSValue doubleValue]) : 0;
+
+    // Metal Hack 开关：未设置过时保持默认开启（与原版行为一致）
+    id metalValue = copyPrefValue(metalKey);
+    metalEnabled = (metalValue == nil) || ([metalValue isKindOfClass:[NSNumber class]] && [metalValue boolValue]);
 }
 
 static NSInteger getMaxFPS() {
@@ -94,11 +100,13 @@ static BOOL shouldEnableForBundleIdentifier(NSString *bundleIdentifier) {
 - (void)setPreferredFrameRateRange:(CAFrameRateRange)range {
     NSInteger target = getTargetFPS();
     if (usesCustomFPS()) {
-        range.minimum = target;
+        // 自定义 FPS 时留出 15fps 缓冲带，避免钉死后偶发掉帧无余量
+        range.minimum = MAX(1, target - 15);
         range.preferred = target;
         range.maximum = target;
     } else {
-        range.minimum = 30;
+        // 保留 App 自身的下限（ProMotion 1-120Hz 自适应屏可进低帧档省电）
+        range.minimum = MIN(range.minimum, 30);
         range.preferred = target;
         range.maximum = target;
     }
@@ -108,6 +116,9 @@ static BOOL shouldEnableForBundleIdentifier(NSString *bundleIdentifier) {
 %end
 
 #pragma mark - CAMetalLayer
+
+// Metal Hack 组：可通过设置中的 Metal Hack 开关整体启停
+%group Metal
 
 %hook CAMetalLayer
 
@@ -139,6 +150,8 @@ static BOOL shouldEnableForBundleIdentifier(NSString *bundleIdentifier) {
 
 %end
 
+%end // Metal group
+
 // #pragma mark - UIKit
 
 // BOOL (*_UIUpdateCycleSchedulerEnabled)(void);
@@ -162,5 +175,7 @@ static BOOL shouldEnableForBundleIdentifier(NSString *bundleIdentifier) {
         //     }
         // }
         %init;
+        if (metalEnabled)
+            %init(Metal);
     }
 }

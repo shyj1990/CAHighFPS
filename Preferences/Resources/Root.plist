@@ -122,6 +122,24 @@
 				<key>useSearchBar</key>
 				<true />
 			</dict>
+			<dict>
+				<key>cell</key>
+				<string>PSGroupCell</string>
+				<key>footerText</key>
+				<string>Metal pacing hack (forces double buffering and minimum presentation duration). Disable if a game stutters or behaves oddly. Reopen apps after changing this.</string>
+			</dict>
+			<dict>
+				<key>cell</key>
+				<string>PSSwitchCell</string>
+				<key>defaults</key>
+				<string>com.apple.UIKit</string>
+				<key>key</key>
+				<string>CAHighFPSEnableMetal</string>
+				<key>default</key>
+				<true />
+				<key>label</key>
+				<string>Metal Hack</string>
+			</dict>
 		</array>
 		<key>title</key>
 		<string>CAHighFPS</string>

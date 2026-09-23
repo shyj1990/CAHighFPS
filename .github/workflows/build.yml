@@ -1,0 +1,95 @@
+name: Build CAHighFPS (roothide)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Theos (roothide)
+        run: |
+          git clone --recursive https://github.com/roothide/theos.git $HOME/theos
+          brew install ldid xz
+
+      - name: Install iOS 16.5 SDK
+        run: |
+          curl -fsSL -o /tmp/sdks.zip https://github.com/theos/sdks/archive/refs/heads/master.zip
+          unzip -q /tmp/sdks.zip -d /tmp/sdks
+          mv /tmp/sdks/sdks-master/iPhoneOS16.5.sdk $HOME/theos/sdks/
+
+      - name: Install PSHeader
+        run: git clone --depth 1 https://github.com/PoomSmart/PSHeader.git $HOME/theos/include/PSHeader
+
+      - name: Build package (roothide)
+        run: |
+          export THEOS=$HOME/theos
+          make package THEOS_PACKAGE_SCHEME=roothide FINALPACKAGE=1
+
+      - name: Verify Mach-O outputs
+        run: |
+          python3 - << 'EOF'
+          import struct, sys, glob, os
+
+          ARCH = {0x0100000C: 'arm64', 0x0000000C: 'arm'}
+          def arch_name(cputype, cpusub):
+              if cputype == 0x0100000C:
+                  # arm64e shares arm64's cputype; distinguished by cpusubtype
+                  # (0x80000002 = CPU_SUBTYPE_ARM64E with ABI v2 flag)
+                  if cpusub & 0x80000000 or (cpusub & 0xFF) == 2:
+                      return 'arm64e'
+                  return 'arm64'
+              return hex(cputype)
+
+          def analyze_thin(name, blob):
+              ncmds, sizeofcmds = struct.unpack('<II', blob[16:24])
+              off, end = 32, 32 + sizeofcmds
+              while off + 8 <= end:
+                  cmd, csize = struct.unpack('<II', blob[off:off+8])
+                  if csize < 8 or off + csize > end:
+                      return f'{name}: CORRUPT load commands'
+                  off += csize
+              ct, csub = struct.unpack('<II', blob[4:12])
+              return f'{name}: [{arch_name(ct, csub)}] load commands OK'
+
+          def analyze(name, blob):
+              magic = blob[:4]
+              if magic == b'\xca\xfe\xba\xbe':
+                  nfat, = struct.unpack('>I', blob[4:8])
+                  outs = [f'{name}: FAT ({nfat} slices)']
+                  for i in range(nfat):
+                      ct, csub, foff, fsize, align = struct.unpack('>IIIII', blob[8+20*i:28+20*i])
+                      outs.append(analyze_thin(f'{name} slice{i} [{arch_name(ct, csub)}]', blob[foff:foff+fsize]))
+                  return outs
+              if magic in (b'\xcf\xfa\xed\xfe', b'\xfe\xed\xfa\xcf'):
+                  return [analyze_thin(name, blob)]
+              return [f'{name}: not a mach-o (magic {magic.hex()}), skipped']
+
+          targets = [t for t in set(
+              glob.glob('.theos/obj/**/*.dylib', recursive=True) +
+              glob.glob('.theos/obj/**/*.bundle/*', recursive=True)
+          ) if os.path.isfile(t)]
+          results = []
+          for t in sorted(targets):
+              results += analyze(t, open(t, 'rb').read())
+          for r in results:
+              print(r)
+          if any('CORRUPT' in r for r in results):
+              sys.exit('mach-o verification FAILED')
+          if not any('slice1 [arm64e]' in r for r in results):
+              sys.exit('no arm64e slice produced')
+          print('all mach-o outputs verified')
+          EOF
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CAHighFPS-roothide-deb
+          path: packages/*.deb
+          if-no-files-found: error

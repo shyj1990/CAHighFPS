@@ -1,5 +1,8 @@
 ifeq ($(THEOS_PACKAGE_SCHEME),rootless)
     TARGET = iphone:clang:16.5:15.0
+else ifeq ($(THEOS_PACKAGE_SCHEME),roothide)
+    TARGET = iphone:clang:16.5:15.0
+    export ARCHS = arm64 arm64e
 else
     TARGET = iphone:clang:14.5:7.0
     export PREFIX = $(THEOS)/toolchain/Xcode11.xctoolchain/usr/bin/

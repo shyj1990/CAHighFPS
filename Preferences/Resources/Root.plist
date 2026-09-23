@@ -8,15 +8,15 @@
 				<key>cell</key>
 				<string>PSGroupCell</string>
 				<key>footerText</key>
-				<string>Forces enabled CoreAnimation apps to run at the highest refresh rate of the device, or at a custom FPS you choose.</string>
+				<string>INTRO_FOOTER</string>
 			</dict>
 			<dict>
 				<key>cell</key>
 				<string>PSGroupCell</string>
 				<key>label</key>
-				<string>FPS</string>
+				<string>FPS_GROUP</string>
 				<key>footerText</key>
-				<string>0 uses the highest refresh rate of the device. Values above the display limit are clamped. Reopen apps after changing this.</string>
+				<string>FPS_FOOTER</string>
 			</dict>
 			<dict>
 				<key>cell</key>
@@ -38,7 +38,7 @@
 				<key>cell</key>
 				<string>PSGroupCell</string>
 				<key>footerText</key>
-				<string>When enabled, the chosen FPS is applied to all apps except those in Blacklisted Apps. Reopen apps after changing this.</string>
+				<string>SYSTEMWIDE_FOOTER</string>
 			</dict>
 			<dict>
 				<key>cell</key>
@@ -50,13 +50,13 @@
 				<key>default</key>
 				<false />
 				<key>label</key>
-				<string>Systemwide</string>
+				<string>SYSTEMWIDE</string>
 			</dict>
 			<dict>
 				<key>cell</key>
 				<string>PSGroupCell</string>
 				<key>footerText</key>
-				<string>Apps that receive the chosen FPS when Systemwide is off.</string>
+				<string>APPLICATIONS_FOOTER</string>
 			</dict>
 			<dict>
 				<key>cell</key>
@@ -68,7 +68,7 @@
 				<key>key</key>
 				<string>CAHighFPS</string>
 				<key>label</key>
-				<string>Applications</string>
+				<string>APPLICATIONS</string>
 				<key>sections</key>
 				<array>
 					<dict>
@@ -91,7 +91,7 @@
 				<key>cell</key>
 				<string>PSGroupCell</string>
 				<key>footerText</key>
-				<string>Apps excluded when Systemwide is on.</string>
+				<string>BLACKLISTED_FOOTER</string>
 			</dict>
 			<dict>
 				<key>cell</key>
@@ -103,7 +103,7 @@
 				<key>key</key>
 				<string>CAHighFPSBlacklist</string>
 				<key>label</key>
-				<string>Blacklisted Apps</string>
+				<string>BLACKLISTED</string>
 				<key>sections</key>
 				<array>
 					<dict>
@@ -126,7 +126,7 @@
 				<key>cell</key>
 				<string>PSGroupCell</string>
 				<key>footerText</key>
-				<string>Metal pacing hack (forces double buffering and minimum presentation duration). Disable if a game stutters or behaves oddly. Reopen apps after changing this.</string>
+				<string>METAL_FOOTER</string>
 			</dict>
 			<dict>
 				<key>cell</key>
@@ -138,7 +138,7 @@
 				<key>default</key>
 				<true />
 				<key>label</key>
-				<string>Metal Hack</string>
+				<string>METAL_LABEL</string>
 			</dict>
 		</array>
 		<key>title</key>

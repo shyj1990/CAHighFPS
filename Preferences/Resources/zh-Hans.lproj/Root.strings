@@ -1,0 +1,11 @@
+"INTRO_FOOTER" = "强制启用的 CoreAnimation 应用以设备最高刷新率或自定义帧率运行。";
+"FPS_GROUP" = "帧率";
+"FPS_FOOTER" = "0 表示使用设备支持的最高刷新率；高于屏幕上限的数值会被自动限制。修改后需重新打开应用生效。";
+"SYSTEMWIDE" = "全局生效";
+"SYSTEMWIDE_FOOTER" = "开启后，所选帧率将应用于除「黑名单应用」以外的所有应用。修改后需重新打开应用生效。";
+"APPLICATIONS" = "应用白名单";
+"APPLICATIONS_FOOTER" = "关闭全局生效时，仅此处勾选的应用会应用所选帧率。";
+"BLACKLISTED" = "黑名单应用";
+"BLACKLISTED_FOOTER" = "开启全局生效时，此处勾选的应用将被排除。";
+"METAL_LABEL" = "Metal Hack";
+"METAL_FOOTER" = "Metal 渲染节奏优化（强制双缓冲与最小呈现间隔）。若游戏出现卡顿或异常可关闭此项。修改后需重新打开应用生效。";

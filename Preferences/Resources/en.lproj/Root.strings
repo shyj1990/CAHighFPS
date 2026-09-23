@@ -1,0 +1,11 @@
+"INTRO_FOOTER" = "Forces enabled CoreAnimation apps to run at the highest refresh rate of the device, or at a custom FPS you choose.";
+"FPS_GROUP" = "FPS";
+"FPS_FOOTER" = "0 uses the highest refresh rate of the device. Values above the display limit are clamped. Reopen apps after changing this.";
+"SYSTEMWIDE" = "Systemwide";
+"SYSTEMWIDE_FOOTER" = "When enabled, the chosen FPS is applied to all apps except those in Blacklisted Apps. Reopen apps after changing this.";
+"APPLICATIONS" = "Applications";
+"APPLICATIONS_FOOTER" = "Apps that receive the chosen FPS when Systemwide is off.";
+"BLACKLISTED" = "Blacklisted Apps";
+"BLACKLISTED_FOOTER" = "Apps excluded when Systemwide is on.";
+"METAL_LABEL" = "Metal Hack";
+"METAL_FOOTER" = "Metal pacing hack (forces double buffering and minimum presentation duration). Disable if a game stutters or behaves oddly. Reopen apps after changing this.";

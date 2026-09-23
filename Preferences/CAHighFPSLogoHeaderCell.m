@@ -3,31 +3,38 @@
 #import <Preferences/PSTableCell.h>
 
 @interface CAHighFPSLogoHeaderCell : PSTableCell
-{
-    UIImageView *_logoView;
-}
+- (instancetype)initWithSpecifier:(PSSpecifier *)specifier;
 @end
 
 @implementation CAHighFPSLogoHeaderCell
 
-- (instancetype)initWithSpecifier:(PSSpecifier *)specifier {
-    self = [super initWithSpecifier:specifier];
-    if (self) {
-        self.backgroundColor = [UIColor clearColor];
-        _logoView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 88, 88)];
-        _logoView.contentMode = UIViewContentModeScaleAspectFit;
-        NSString *path = [[NSBundle bundleForClass:[self class]] pathForResource:@"logo" ofType:@"png"];
-        if (path)
-            _logoView.image = [UIImage imageWithContentsOfFile:path];
-        [self addSubview:_logoView];
-    }
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier specifier:(PSSpecifier *)specifier {
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier specifier:specifier];
+    if (self)
+        [self ca_setup];
     return self;
+}
+
+// 兼容运行时经 initWithSpecifier: 创建 cell 的路径（该选择器在新头文件中已无声明）
+- (instancetype)initWithSpecifier:(PSSpecifier *)specifier {
+    return [self initWithStyle:UITableViewCellStyleDefault reuseIdentifier:nil specifier:specifier];
+}
+
+- (void)ca_setup {
+    if (_logoView)
+        return;
+    self.backgroundColor = [UIColor clearColor];
+    NSString *path = [[NSBundle bundleForClass:[self class]] pathForResource:@"logo" ofType:@"png"];
+    UIImage *image = path ? [UIImage imageWithContentsOfFile:path] : nil;
+    _logoView = [[UIImageView alloc] initWithImage:image];
+    _logoView.contentMode = UIViewContentModeScaleAspectFit;
+    [self addSubview:_logoView];
 }
 
 - (void)layoutSubviews {
     [super layoutSubviews];
-    CGFloat height = [self preferredHeightForSpecifier:self.specifier];
-    _logoView.center = CGPointMake(self.bounds.size.width / 2.0, height / 2.0);
+    CGFloat side = 88.0, height = 116.0;
+    _logoView.frame = CGRectMake((self.bounds.size.width - side) / 2.0, (height - side) / 2.0, side, side);
 }
 
 - (CGFloat)preferredHeightForSpecifier:(PSSpecifier *)specifier {

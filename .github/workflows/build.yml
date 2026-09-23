@@ -32,7 +32,7 @@ jobs:
           export THEOS=$HOME/theos
           git clone --depth 1 https://github.com/opa334/AltList.git /tmp/AltList
           cd /tmp/AltList
-          make clean && make FINALPACKAGE=1 ARCHS="arm64 arm64e"
+          make clean && make FINALPACKAGE=1 ARCHS="arm64 arm64e" TARGET="iphone:clang:16.5:14.0"
           mkdir -p $THEOS/lib/iphone/roothide
           cp -Rv ./.theos/obj/AltList.framework $THEOS/lib/
           cp -Rv ./.theos/obj/AltList.framework $THEOS/lib/iphone/roothide/

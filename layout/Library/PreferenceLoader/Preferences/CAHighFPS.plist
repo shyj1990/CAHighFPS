@@ -10,6 +10,8 @@
 			<string>PSLinkCell</string>
 			<key>detail</key>
 			<string>CAHighFPSRootListController</string>
+			<key>icon</key>
+			<string>CAHighFPS.png</string>
 			<key>isController</key>
 			<true />
 			<key>label</key>

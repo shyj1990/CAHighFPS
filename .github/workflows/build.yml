@@ -27,6 +27,16 @@ jobs:
       - name: Install PSHeader
         run: git clone --depth 1 https://github.com/PoomSmart/PSHeader.git $HOME/theos/include/PSHeader
 
+      - name: Install AltList framework
+        run: |
+          export THEOS=$HOME/theos
+          git clone --depth 1 https://github.com/opa334/AltList.git /tmp/AltList
+          cd /tmp/AltList
+          make clean && make FINALPACKAGE=1 ARCHS="arm64 arm64e"
+          mkdir -p $THEOS/lib/iphone/roothide
+          cp -Rv ./.theos/obj/AltList.framework $THEOS/lib/
+          cp -Rv ./.theos/obj/AltList.framework $THEOS/lib/iphone/roothide/
+
       - name: Build package (roothide)
         run: |
           export THEOS=$HOME/theos

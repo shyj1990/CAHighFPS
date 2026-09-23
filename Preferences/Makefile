@@ -2,7 +2,7 @@ include $(THEOS)/makefiles/common.mk
 
 BUNDLE_NAME = CAHighFPS
 
-$(BUNDLE_NAME)_FILES = CAHighFPSRootListController.m
+$(BUNDLE_NAME)_FILES = CAHighFPSRootListController.m CAHighFPSLogoHeaderCell.m
 $(BUNDLE_NAME)_INSTALL_PATH = /Library/PreferenceBundles
 $(BUNDLE_NAME)_FRAMEWORKS = UIKit
 $(BUNDLE_NAME)_PRIVATE_FRAMEWORKS = Preferences

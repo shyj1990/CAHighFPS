@@ -1,54 +1,43 @@
-# CAHighFPS
+# CAHighFPS — Overdrive 个人修改版
 
-Makes your CoreAnimation applications use the highest available FPS, or a custom rate you choose.
+基于 [PoomSmart/CAHighFPS](https://github.com/PoomSmart/CAHighFPS) 的个人修改版，针对 **roothide（relaxin）越狱环境** 重新打包，并加入若干体验优化。
 
-## Settings
+原项目的工作原理（CADisplayLink / CAMetalLayer 强制高帧率）见[上游 README](https://github.com/PoomSmart/CAHighFPS#readme)，此处不再重复。
 
-Open **Settings → CAHighFPS**:
+## 与原版的区别
 
-- **FPS**: Slider from 0 to 120. `0` (default) uses the highest refresh rate of the device. Any other value is forced for enabled apps and clamped to the display's maximum.
-- **Systemwide**: Applies the chosen FPS to every app except SpringBoard and those in Blacklisted Apps. Off by default, so existing per-app selections keep working.
-- **Applications**: Whitelist used when Systemwide is off. Only these apps get the chosen FPS.
-- **Blacklisted Apps**: Apps skipped when Systemwide is on.
+| 项目 | 原版 | Overdrive 修改版 |
+|---|---|---|
+| 软件包格式 | rootful / rootless | **roothide**（`iphoneos-arm64e`），依赖框架链接采用 `@loader_path/.jbroot` 相对路径规范 |
+| 设置界面语言 | 英文 | 简体中文（保留英文回退，自动跟随系统语言） |
+| 设置列表图标 | 无 | "120Hz" 图标 |
+| 帧率下限 | `preferredFrameRateRange` 的 `minimum` 硬编码为 30 | 保留 App 自身请求的下限，不强制抬高；ProMotion 1–120Hz 自适应可进入低帧档，更省电 |
+| 自定义帧率 | min/preferred/max 全部钉死在同一值 | 保留 15fps 缓冲带（`minimum = 目标值 − 15`），偶发掉帧时系统有降档余量 |
+| Metal Hack（强制 `maximumDrawableCount = 2`） | 无条件生效 | 新增设置页独立开关（默认开启），Metal 游戏出现顿挫时可单独关闭 |
 
-Reopen an app after changing settings.
+所有修改仅涉及打包方式与偏好设置侧；核心 hook 逻辑与原版一致。
 
-## Part 1: CADisplayLink
- 
-Quoting from [Apple](https://developer.apple.com/documentation/quartzcore/cadisplaylink), `CADisplayLink` is a timer object that allows your app to synchronize its drawing to the refresh rate of the display. A5 devices (iPhone 4s and iPad 2) are the first to introduce 60 HZ refresh rate - and that the applications can run at its best at 60 frames per second (FPS).
+## 适用情况
 
-### Frame Interval
+- **越狱环境**：roothide 系（relaxin 等），不适用于传统 rootful 或 rootless
+- **系统**：iOS 15 及以上；已在 iOS 17.0 实测
+- **设备**：arm64e 设备（iPhone XS 及之后）首选；已在 iPhone 15 Pro（A17 Pro / 120Hz ProMotion）测试
+- **依赖**：`com.opa334.altlist`（roothide 版本，白名单 / 黑名单应用选择器所需）
 
-There is a (now-deprecated) property of `CADisplayLink` called `frameInterval` that the developers can set to limit the FPS. If set to `1`, the FPS is 60. This is true according to the underlying logic of `setFrameInterval:` method:
+## 安装
 
-![image](https://user-images.githubusercontent.com/3608783/135698671-df790125-cc65-4f5f-93bc-49744aea50c9.png)
+1. 从本仓库 [Releases](../../releases) 下载 deb
+2. 通过 Filza 打开安装，或导入 Sileo（会自动补装 AltList 依赖）
+3. 注销（respring）后进入 设置 → CAHighFPS
 
-Some applications out there choose `2` as a value, rendering the final FPS at `60/2 = 30` which doesn't sound cool for the devices that are capable of higher FPS.
+> 修改设置后需要**重新打开目标 App** 才会生效。
 
-This is where CAHighFPS enforces `frameInterval` so the effective rate matches the chosen FPS (`1` when using the display maximum).
+## 构建
 
-### Preferred Frames Per Second
+通过 GitHub Actions（macOS runner + roothide Theos）自动构建，主插件与偏好设置包均为 arm64 + arm64e FAT 双架构。依赖框架 AltList 亦以 roothide scheme 编译，保证运行时动态库路径可解析。
 
-It is a substitute `CADisplayLink` property of `frameInterval` (until iOS 15.0), goes by the name `preferredFramesPerSecond`. If set to zero, the system will try to match the FPS to the [highest available refresh rate of the device](https://developer.apple.com/documentation/quartzcore/cadisplaylink/1648421-preferredframespersecond).
+## 声明
 
-Here's the underlying logic of `setPreferredFramesPerSecond:`:
-
-![image](https://user-images.githubusercontent.com/3608783/135698799-90669124-de3f-4e2f-8bcd-81ab5486f521.png)
-
-Again, some applications can explicitly set it to `30` or `60`. Those devices that are capable of higher than that will not be so pleased.
-
-This is where CAHighFPS enforces `preferredFramesPerSecond` to `0` (display maximum) or to the custom FPS you set.
-
-### Preferred Framerate Range
-
-Introduced in [iOS 15](https://developer.apple.com/documentation/quartzcore/cadisplaylink/3875343-preferredframeraterange?language=objc), this is now their main way of dictating the effective FPS. By default, `preferred` and `maximum` of `CAFrameRateRange` are set to the highest supported FPS by the device. A custom FPS pins `minimum`, `preferred`, and `maximum` to that value.
-
-## Part 2: CAMetalLayer
-
-Metal has been a thing since iOS 8. For some reasons, there are not a lot of discussions about optimizing Metal apps for ProMotion display. The best I found are to override `-[CAMetalLayer maximumDrawableCount]` ([reference](https://blog.csdn.net/ByteDanceTech/article/details/123437098)) and `-[CAMetalDrawable presentAfterMinimumDuration:]` to allow for ideal ProMotion FPS.
-
-## Everything Else
-
-### Battery: Does it drain your battery?
-
-Because CAHighFPS can enforce a higher FPS than an app chose, it's only natural that this will consume more energy. Draining may be significant or else. YMMV.
+- 本项目**仅供个人测试与学习研究使用**，请勿用于商业用途或二次分发
+- 使用风险自负：强制高帧率会增加耗电，Metal 应用表现因 App 而异
+- 原项目版权归 [PoomSmart](https://github.com/PoomSmart) 所有，本修改版与原作者无关；修改版相关问题请在本仓库提 Issue，请勿打扰原作者

@@ -3,6 +3,9 @@
 #import <Preferences/PSTableCell.h>
 
 @interface CAHighFPSLogoHeaderCell : PSTableCell
+{
+    UIImageView *_logoView;
+}
 - (instancetype)initWithSpecifier:(PSSpecifier *)specifier;
 @end
 
